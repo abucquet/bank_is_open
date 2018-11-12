@@ -11,73 +11,78 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 
-directory = "bank_is_open/basketball_reference-master/matches/united_states/nba/"
-season = "2007-2008"
-files = os.listdir(directory + season)
+def compile_season(season, directory="basketball_reference-master/matches/united_states/nba/"):
+	'''
+	Compiles the data from a season by making two daraframes: one for every team-game, and one for every player-game
+	@params: season (str): the season we want to be looking at
+			 directory (str): the path of the folder containing all seasons
+	returns: two dataframes
+	'''
+	files = os.listdir(directory + season)
 
-season_avg_teams = defaultdict(list)
-season_avg_players = defaultdict(list)
-last_ten_avg_teams = defaultdict(list)
-last_ten_teams = defaultdict(list)
+	team_game_index = defaultdict(int)
 
-team_game_index = {}
+	season_data = pd.DataFrame() ### need to specify columns
 
-season_data = pd.DataFrame() ### need to specify columns
+	for file in files:
+		if ".json" not in file: continue
 
-for file in files:
-	if ".json" not in file: continue
+		with open(directory + season + "/" + file) as json_data:
+			    game_data = json.load(json_data)
+			    json_data.close()
 
-	with open(file) as json_data:
-		    game_data = json.load(json_data)
-		    json_data.close()
+		team_game_index[game_data["home"]["name"]] += 1
+		team_game_index[game_data["away"]["name"]] += 1
+		
+		#################### GAME TABLE
+		## initialize the data entries
+		stats = {}
 
-	
-	#################### GAME TABLE
-	## initialize the data entries
-	stats = {}
+		## location ??
+		#stats["Location"] = 
 
-	## location ??
-	#stats["Location"] = 
+		## date
+		stats["date"] = game_data["code"][:-3]
 
-	## index: team1-team2
-	stats["index"] = game_data["home"]["name"]+game_data["away"]["name"]
+		## team names
+		stats["home_name"] = game_data["home"]["name"]
+		stats["away_name"] = game_data["away"]["name"]
 
-	## date
-	stats["date"] = game_data["code"][:-3]
+		for name, value in game_data["home"]["totals"].iteritems():
+			stats["home_" + name] = value
 
-	## team names
-	stats["home_name"] = game_data["home"]["name"]
-	stats["away_name"] = game_data["away"]["name"]
+		for name, value in game_data["away"]["totals"].iteritems():
+			stats["away_" + name] = value
 
-	for name, value in game_data["home"]["totals"].iteritems():
-		stats["home_" + name] = value
+		## adding the stats to the df
+		# for home team
+		stats["index"] = game_data["home"]["name"] + str(team_game_index[game_data["home"]["name"]])
+		if season_data.shape[0] == 0:
+			season_data = pd.DataFrame(columns=stats.keys())
+		season_data = season_data.append(stats, ignore_index=True)
 
-	for name, value in game_data["away"]["totals"].iteritems():
-		stats["away_" + name] = value
+		# for away team
+		stats["index"] = game_data["away"]["name"] + str(team_game_index[game_data["away"]["name"]])
+		season_data = season_data.append(stats, ignore_index=True)
 
+	# print(team_game_index)
 
-	###################### PLAYER TABLE
-	## One row per player per game
-	players = {}
-	for team in game_data:	# "home" and "away". Should loop over keys
-		for entry in game_data[team]:
-			# Get team for player (in case they switch teams)
-			# Loop over players and fill table
-
-
+		###################### PLAYER TABLE
+		## One row per player per game
+		players = {}
+		for team in game_data:	# "home" and "away". Should loop over keys
+			for entry in game_data[team]:
+				# Get team for player (in case they switch teams)
+				# Loop over players and fill table
 
 	## SOME SORT OF ERROR CHECKING TO MAKE SURE WE HAVE ALL THE DATA FOR A SEASON:
 	# Make sure we have all the regular-season games
 	# Make sure that player data is complete
 	# Simple sanity check on the numbers making sense
 
+	return season_data
 
 
-print(game_data["code"])
-print(game_data["away"]["name"])
-#print(game_data["away"]["totals"])
-print(game_data["away"]["scores"])
-print(game_data["home"]["name"])
-#print(game_data["home"]["totals"])
-print(game_data["home"]["scores"])
-
+if __name__ == "__main__":
+	df = compile_season("2007-2008")
+	print(df.shape)
