@@ -56,7 +56,20 @@ for file in files:
 		stats["away_" + name] = value
 
 
+	###################### PLAYER TABLE
+	## One row per player per game
+	players = {}
+	for team in game_data:	# "home" and "away". Should loop over keys
+		for entry in game_data[team]:
+			# Get team for player (in case they switch teams)
+			# Loop over players and fill table
 
+
+
+	## SOME SORT OF ERROR CHECKING TO MAKE SURE WE HAVE ALL THE DATA FOR A SEASON:
+	# Make sure we have all the regular-season games
+	# Make sure that player data is complete
+	# Simple sanity check on the numbers making sense
 
 
 
