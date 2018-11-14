@@ -75,7 +75,6 @@ def compile_season(season, directory="basketball_reference-master/matches/united
 			for entry in game_data[team]["players"]:
 				# Get team for player (in case they switch teams)
 				# Loop over players and fill table
-				players["name"].append(entry)
 				players["date"].append(game_data["code"][:-3])
 				players["team"].append(game_data[team]["name"])
 				for name, value in game_data[team]["players"][entry].items():
@@ -85,6 +84,7 @@ def compile_season(season, directory="basketball_reference-master/matches/united
 
 		#player_date_data = pd.DataFrame(columns=players.keys())
 		#player_date_data = player_date_data.append(players, ignore_index=True)
+
 		player_date_data = pd.DataFrame(players)
 
 
