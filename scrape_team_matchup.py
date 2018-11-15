@@ -45,7 +45,7 @@ def get_and_format_data(date, fields, verbose=True):
 		reshaped = []
 		tmp = None
 		for d in data:
-			if (len(d) <= 2 and int(d) == index) or index == 0:
+			if (len(d) <= 2 and d != "--" and int(d) == index) or index == 0:
 				reshaped.append(tmp)
 				index += 1
 				tmp = []
@@ -149,8 +149,8 @@ def get_fields(date):
 
 if __name__ == "__main__":
 
-	start_date = "2007-12-09"
-	end_date = "2018-11-12"
+	start_date = "2008-11-10"
+	end_date = "2009-06-14"
 
 	dates = [start_date]
 	while start_date != end_date:
