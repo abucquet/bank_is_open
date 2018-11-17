@@ -5,6 +5,7 @@ import statsmodels.api as sm
 from sklearn import linear_model, neural_network
 from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.multioutput import MultiOutputRegressor
 
 # Get data
 filename = "./data/aggregated_2008-2009.pkl"
@@ -106,34 +107,62 @@ for a in alphas:
 	print('Linreg Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
 	r2s.append(metrics.r2_score(y_val, y_pred))
 
+print("Lasso sweep results:")
 print(alphas)
 print(mses)
 print(r2s)
 
-# Try random forests
+# Sweep found best max depth = 10
+depths = [10]
+mses = []
+r2s = []
+for depth in depths:
+	# Try random forests
+	regr = RandomForestRegressor(n_estimators=50, max_depth=depth,
+	                                random_state=2)
+	regr.fit(X_train, y_train)
+	# Make predictions using the testing set
+	y_pred = regr.predict(X_val)
+	# The mean squared error
+	print("Random Forest Mean squared error: %.2f"
+	      % metrics.mean_squared_error(y_val, y_pred))
+	mses.append(metrics.mean_squared_error(y_val, y_pred))
+	# Explained variance score: 1 is perfect prediction
+	print('Random Forest Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
+	r2s.append(metrics.r2_score(y_val, y_pred))
+
+print("Random Forest depth sweep results:")
+print(depths)
+print(mses)
+print(r2s)
+
+# Sweep over num trees
+ntrees = [10, 20, 50, 100]
+mses = []
+r2s = []
+for ntree in ntrees:
+	# Try random forests
+	regr = RandomForestRegressor(n_estimators=ntree, max_depth=10,
+	                                random_state=2)
+	regr.fit(X_train, y_train)
+	# Make predictions using the testing set
+	y_pred = regr.predict(X_val)
+	# The mean squared error
+	print("Random Forest Mean squared error: %.2f"
+	      % metrics.mean_squared_error(y_val, y_pred))
+	mses.append(metrics.mean_squared_error(y_val, y_pred))
+	# Explained variance score: 1 is perfect prediction
+	print('Random Forest Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
+	r2s.append(metrics.r2_score(y_val, y_pred))
+
+print("Random Forest ntrees sweep results:")
+print(ntrees)
+print(mses)
+print(r2s)
 
 #####################
 # FEATURE SELECTION #
 #####################
-
-# Try PCA
-from sklearn.decomposition import PCA
-pca = PCA(n_components=15)
-pca.fit(X_train)
-print(pca.explained_variance_ratio_)
-X_train = pca.transform(X_train)
-X_val = pca.transform(X_val)
-X_test = pca.transform(X_test)
-
-'''
-# Try features with nonzero coefficients from lasso
-
-# filter = (regr.coef_ != 0)
-print(X_train.shape)
-X_train = X_train[:,[i for i in range(len(regr.coef_)) if regr.coef_[i] != 0 ]]
-print(X_train.shape)
-X_val = X_val[:,[i for i in range(len(regr.coef_)) if regr.coef_[i] != 0]]
-'''
 
 from sklearn.preprocessing import StandardScaler  
 scaler = StandardScaler()  
@@ -148,6 +177,25 @@ X_val = scaler.transform(X_val)
 y_val = scaler2.transform(y_val[:,np.newaxis]).squeeze()
 X_test = scaler.transform(X_test)  
 y_test = scaler2.transform(y_test[:,np.newaxis]).squeeze()
+
+# Try PCA
+from sklearn.decomposition import PCA
+pca = PCA(n_components=15)
+pca.fit(X_train)
+print("Explained variance ratio:" + str(pca.explained_variance_ratio_))
+X_train = pca.transform(X_train)
+X_val = pca.transform(X_val)
+X_test = pca.transform(X_test)
+
+'''
+# Try features with nonzero coefficients from lasso
+
+# filter = (regr.coef_ != 0)
+print(X_train.shape)
+X_train = X_train[:,[i for i in range(len(regr.coef_)) if regr.coef_[i] != 0 ]]
+print(X_train.shape)
+X_val = X_val[:,[i for i in range(len(regr.coef_)) if regr.coef_[i] != 0]]
+'''
 
 # Create linear regression object
 regr = neural_network.MLPRegressor(solver='lbfgs', alpha=1e-5, activation = 'logistic', hidden_layer_sizes=(4,2), random_state=1)
