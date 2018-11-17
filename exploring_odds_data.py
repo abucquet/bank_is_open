@@ -4,6 +4,7 @@ import random
 import pickle
 import numpy as np
 from tqdm import tqdm
+from scipy import stats
 
 
 base_name = "data/odds_data/{}.xlsx"
@@ -73,6 +74,13 @@ def load_odds_data(filepath, season):
 
 		ML_h = row2["ML"][i+1]
 		ML_a = row1["ML"][i]
+		
+		# if the ML of the home is less than tat of the away, the home team is favorite so we readjust the spread
+		if ML_h > ML_a:
+			if type(spread) == int:
+				spread = -spread
+				spread_2H = -spread_2H
+
 
 		win_margin = row2["Final"][i+1] - row1["Final"][i]
 		final_points = row2["Final"][i+1] + row1["Final"][i]
@@ -111,7 +119,19 @@ def merge_with_features(odds_data):
 
 	cols = old_cols + new_cols
 
-	return pd.DataFrame(new_rows, columns=cols)
+	data = pd.DataFrame(new_rows, columns=cols)
+
+	
+	# final cleaning of the data
+	stripped_cols = [c for c in cols if "Team" not in c]
+
+	data = data[stripped_cols]
+
+	data = data.dropna(axis = 1)
+
+	data = data[(data[data.columns] != "--").all(axis=1)]
+
+	return data
 
 
 
@@ -137,6 +157,68 @@ def get_data_from_pickle(date, home_team, away_team):
 
 	return (home_cols + away_cols, data)
 
+def chisquare(data):
+	'''
+	Runs a chi-square test of correlation between the betting indicators in the data
+	Returns: nothing
+	'''
+	counts_OU_spread = np.zeros((2, 2))
+	counts_OU_ML = np.zeros((2, 2))
+
+	OU_list = []
+	ML_list = []
+	spread_list = []
+
+	errors = 0
+
+	for i, row in season_data.iterrows():
+		OU = 0
+		ML = 0
+		spread = 0
+		try:
+			if season_data["OU"][i] > season_data["Points"][i]: 
+				OU = 1
+
+			if season_data["Spread"][i] > season_data["Win Margin"][i]: 
+				spread = 1
+
+			direction_ML = 1 if season_data["ML_home"][i] < season_data["ML_away"][i]  else -1
+
+			if direction_ML*season_data["Win Margin"][i] > 0: 
+				ML = 1
+
+			counts_OU_spread[OU][spread] += 1
+			counts_OU_ML[OU][ML] += 1
+
+
+			OU_list.append(OU)
+			ML_list.append(ML)
+			spread_list.append(spread)
+
+		except:
+			errors += 1
+
+	print("########### Chi-squared")
+	print("Over-Under vs. Spread")
+	print(counts_OU_spread)
+	print(stats.chisquare(counts_OU_spread.reshape(-1)))
+	print("Over-Under vs. Money-Line")
+	print(counts_OU_ML)
+	print(stats.chisquare(counts_OU_ML.reshape(-1)))
+	print("")
+
+	# run pearson's r^2
+	print("########### Pearson's R")
+	print("Over-Under vs. Money Line")
+	print(stats.pearsonr(OU_list, ML_list))
+	print("Over-Under vs. Spread")
+	print(stats.pearsonr(OU_list, spread_list))
+	print("Spread vs. Money Line")
+	print(stats.pearsonr(spread_list, ML_list))
+	print("")
+
+	print("In the process, we have had {} errors.".format(errors))
+
 
 if __name__ == '__main__':
 	season = "2008-2009"
@@ -146,5 +228,9 @@ if __name__ == '__main__':
 
 	season_data = merge_with_features(odds_data)
 	
+	print(season_data.shape)
+
 	with open(save_to.format(season), "wb") as f:
 		pickle.dump(season_data, f)
+
+	chisquare(season_data)
