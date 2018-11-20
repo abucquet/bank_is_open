@@ -67,6 +67,8 @@ def load_odds_data(filepath, season):
 		OU_Spread = np.sort([row1["Open"][i], row2["Open"][i+1]])
 		OU = OU_Spread[1]
 		spread = OU_Spread[0]
+		if type(OU) not in [np.float64, np.int64] or type(spread) not in [np.float64, np.int64]:
+			continue
 
 		OU_Spread_2H = np.sort([row1["2H"][i], row2["2H"][i+1]])
 		OU_2H = OU_Spread_2H[1]
