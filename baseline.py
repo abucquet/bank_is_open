@@ -57,19 +57,18 @@ X_train_wConst = sm.add_constant(X_train)
 X_val_wConst = sm.add_constant(X_val)
 X_test_wConst = sm.add_constant(X_test)
 
-'''
 # Model may need interaction terms
-print(y_train)
-print(X_train_wConst)
-neg_binom_model = sm.GLM(y_train.values, X_train_wConst.values, family=sm.families.NegativeBinomial()) # First pass responding variable, then matrix of features
+# print(y_train)
+# print(X_train_wConst)
+print(y_train.values)
+neg_binom_model = sm.GLM(y_train, X_train_wConst, family=sm.families.NegativeBinomial()) # First pass responding variable, then matrix of features
 neg_binom_results = neg_binom_model.fit()
-print(neg_binom_results.summary)
+print(neg_binom_results.summary())
 
 # Can also try poisson regression
 poisson_model = sm.GLM(y_train, X_train_wConst, family=sm.families.Poisson()) # First pass responding variable, then matrix of features
 poisson_results = poisson_model.fit()
-print(poisson_results.summary)
-'''
+print(poisson_results.summary())
 
 # SKLEARN: INTERCEPT CALCULATED BY DEFAULT, NO NEED TO ADD IN COLUMN OF ONES
 
@@ -80,7 +79,7 @@ regr.fit(X_train, y_train)
 # Make predictions using the testing set
 y_pred = regr.predict(X_val)
 # The coefficients
-print('Linreg Coefficients: \n', regr.coef_)
+# print('Linreg Coefficients: \n', regr.coef_)
 # The mean squared error
 print("Linreg Mean squared error: %.2f"
       % metrics.mean_squared_error(y_val, y_pred))
