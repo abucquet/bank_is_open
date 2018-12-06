@@ -12,8 +12,8 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
-PROCESSED_PATH = "./processed_game_data/"
-PROCESSED_PATH_FORMAT = "./processed_game_data/{}.csv"
+PROCESSED_PATH = "./data/processed_game_data/"
+PROCESSED_PATH_FORMAT = "./data/processed_game_data/{}.csv"
 
 def compile_season(season, directory="basketball_reference-master/matches/united_states/nba/"):
 	'''
