@@ -5,6 +5,7 @@ import pickle
 import numpy as np
 from tqdm import tqdm
 from scipy import stats
+import os
 
 
 base_name = "data/odds_data/{}.xlsx"
@@ -21,6 +22,9 @@ team_map = {
 			'NewOrleans': 'New Orleans', 
 			'NewJersey': 'Brooklyn'
 			}
+
+ODDS_PATH = "./data/odds_data/"
+ODDS_PATH_PROCESSED = "./data/odds_data_processed/{}.csv"
 
 
 def load_odds_data(filepath, season):
@@ -159,7 +163,7 @@ def get_data_from_pickle(date, home_team, away_team):
 
 	return (home_cols + away_cols, data)
 
-def chisquare(data):
+def chisquare(season_data):
 	'''
 	Runs a chi-square test of correlation between the betting indicators in the data
 	Returns: nothing
@@ -200,39 +204,83 @@ def chisquare(data):
 		except:
 			errors += 1
 
-	print("########### Chi-squared")
+	print("----------------------")
+	print("Chi-squared test results")
+
+
 	print("Over-Under vs. Spread")
-	print(counts_OU_spread)
-	print(stats.chisquare(counts_OU_spread.reshape(-1)))
+	#print(counts_OU_spread)
+	test_stat, degrees_freedom, p = run_chisquare(counts_OU_spread)
+	print("The test statistic is {} and has {} degrees of freedom. This gives a p-value of {}".format(test_stat, degrees_freedom, p))
+
+	print("----")
+
 	print("Over-Under vs. Money-Line")
-	print(counts_OU_ML)
-	print(stats.chisquare(counts_OU_ML.reshape(-1)))
+	#print(counts_OU_ML)
+	test_stat, degrees_freedom, p = run_chisquare(counts_OU_ML)
+	print("The test statistic is {} and has {} degrees of freedom. This gives a p-value of {}".format(test_stat, degrees_freedom, p))
+	
+	print("----------------------")
 	print("")
 
-	# run pearson's r^2
-	print("########### Pearson's R")
-	print("Over-Under vs. Money Line")
-	print(stats.pearsonr(OU_list, ML_list))
-	print("Over-Under vs. Spread")
-	print(stats.pearsonr(OU_list, spread_list))
-	print("Spread vs. Money Line")
-	print(stats.pearsonr(spread_list, ML_list))
-	print("")
+	# # run pearson's r^2
+	# print("########### Pearson's R")
+	# print("Over-Under vs. Money Line")
+	# print(stats.pearsonr(OU_list, ML_list))
+	# print("Over-Under vs. Spread")
+	# print(stats.pearsonr(OU_list, spread_list))
+	# print("Spread vs. Money Line")
+	# print(stats.pearsonr(spread_list, ML_list))
+	# print("")
 
-	print("In the process, we have had {} errors.".format(errors))
+	#print("In the process, we have had {} errors.".format(errors))
+	#print("")
 
+def run_chisquare(count_data):
+	'''
+	Runs a chi-squared test on the categorical data |count_data|, a 2D numpy array
+	'''
+
+	degrees_freedom = (count_data.shape[0] - 1) * (count_data.shape[1] - 1)
+
+	row_counts = np.sum(count_data, axis=0)
+	col_counts = np.sum(count_data, axis=1)
+	total_sum = np.sum(count_data)
+
+	expected_counts = np.outer(row_counts, col_counts)/total_sum
+
+	test_stat = count_data - expected_counts
+	test_stat = test_stat * test_stat
+	test_stat = test_stat / expected_counts
+	test_stat = np.sum(test_stat)
+
+	return test_stat, degrees_freedom, (1 - stats.chi2.cdf(test_stat, degrees_freedom))
 
 if __name__ == '__main__':
-	season = "2008-2009"
-	file = base_name.format(season)
-	odds_data = load_odds_data(file, season)
-	print("Loaded odds data.")
+	files = os.listdir(ODDS_PATH)
+	for file in files:
 
-	season_data = merge_with_features(odds_data)
+		print("")
+		print(file)
+		print("")
+
+		if "odds" not in file: continue
+		path = ODDS_PATH + file
+		season = int(file.split(" ")[2].split("-")[0])
+
+		season_str = str(season) + "-" + str(season+1)
+
+		save_to = ODDS_PATH_PROCESSED.format(season_str)
+
+		odds_data = load_odds_data(path, season_str)
+
+		odds_data.to_csv(ODDS_PATH_PROCESSED)
+
+		chisquare(odds_data)
+
+	#season_data = merge_with_features(odds_data)
 	
-	print(season_data.shape)
+	#print(season_data.shape)
 
-	with open(save_to.format(season), "wb") as f:
-		pickle.dump(season_data, f)
-
-	chisquare(season_data)
+	# with open(save_to.format(season), "wb") as f:
+	# 	pickle.dump(season_data, f)
