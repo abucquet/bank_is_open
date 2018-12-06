@@ -119,7 +119,7 @@ if __name__ == "__main__":
 	if not os.path.exists(PROCESSED_PATH):
 		os.mkdir(PROCESSED_PATH)
 
-	seasons = "2007-to-2011"
+	seasons = "2007-to-2018"
 	seasons = get_seasons(seasons)
 	print(seasons)
 
