@@ -10,6 +10,10 @@ import os
 from collections import defaultdict
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
+
+PROCESSED_PATH = "./processed_game_data/"
+PROCESSED_PATH_FORMAT = "./processed_game_data/{}.csv"
 
 def compile_season(season, directory="basketball_reference-master/matches/united_states/nba/"):
 	'''
@@ -19,13 +23,14 @@ def compile_season(season, directory="basketball_reference-master/matches/united
 	returns: two dataframes
 	'''
 	files = os.listdir(directory + season)
+	print("Found {0} files for season {1}".format(len(files), season))
 
 	team_game_index = defaultdict(int)
 
 	season_data = pd.DataFrame() ### need to specify columns
 	player_date_data = pd.DataFrame()
 
-	for file in files[1:10]:
+	for file in tqdm(files):
 		if ".json" not in file: continue
 
 		with open(directory + season + "/" + file) as json_data:
@@ -67,7 +72,7 @@ def compile_season(season, directory="basketball_reference-master/matches/united
 		season_data = season_data.append(stats, ignore_index=True)
 
 	# print(team_game_index)
-
+		continue
 		###################### PLAYER TABLE
 		players = defaultdict(list)
 		## One row per player per game
@@ -95,9 +100,31 @@ def compile_season(season, directory="basketball_reference-master/matches/united
 
 	return season_data, player_date_data
 
+def get_seasons(seasons):
+    """
+    gets seasons involved in range
+    """
+    if '-to-' in seasons:
+        from_, to = map(int, seasons.split('-to-'))
+        years = list(range(from_, to+1))
+        seasons = []
+        for i in range(0, len(years)-1):
+            season = "-".join(map(str, [years[i], years[i+1]]))
+            seasons.append(season)
+    return seasons
+
 
 if __name__ == "__main__":
-	df, player_df = compile_season("2007-2008")
-	print(df.shape)
-	df.to_csv("./testcsv.csv")
-	player_df.to_csv("./testcsv2.csv")
+
+	if not os.path.exists(PROCESSED_PATH):
+		os.mkdir(PROCESSED_PATH)
+
+	seasons = "2007-to-2011"
+	seasons = get_seasons(seasons)
+	print(seasons)
+
+	for season in seasons:
+		df, player_df = compile_season(season)
+		print(df.shape)
+		df.to_csv(PROCESSED_PATH_FORMAT.format(season + "_games"))
+		player_df.to_csv(PROCESSED_PATH_FORMAT.format(season + "_players"))
