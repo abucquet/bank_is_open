@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
 		odds_data = load_odds_data(path, season_str)
 
-		odds_data.to_csv(ODDS_PATH_PROCESSED)
+		odds_data.to_csv(save_to)
 
 		chisquare(odds_data)
 

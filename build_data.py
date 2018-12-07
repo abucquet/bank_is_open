@@ -13,7 +13,6 @@ import numpy as np
 from tqdm import tqdm
 
 PROCESSED_PATH = "./data/processed_game_data/"
-PROCESSED_PATH_FORMAT = "./data/processed_game_data/{}.csv"
 
 def compile_season(season, directory="basketball_reference-master/matches/united_states/nba/"):
 	'''
@@ -126,5 +125,5 @@ if __name__ == "__main__":
 	for season in seasons:
 		df, player_df = compile_season(season)
 		print(df.shape)
-		df.to_csv(PROCESSED_PATH_FORMAT.format(season + "_games"))
-		player_df.to_csv(PROCESSED_PATH_FORMAT.format(season + "_players"))
+		df.to_csv(PROCESSED_PATH + season + "_games.csv")
+		player_df.to_csv(PROCESSED_PATH + season + "_players.csv")
