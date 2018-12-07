@@ -7,7 +7,6 @@ from sklearn import model_selection, metrics
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.multioutput import MultiOutputRegressor
 
-# oops
 # Get data
 filename = "./data/aggregated_2008-2009.pkl"
 with open(filename, "rb") as f:
