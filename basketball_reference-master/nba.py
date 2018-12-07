@@ -48,7 +48,10 @@ class NbaBRefMatch(BRefMatch):
                 if metric == 'MP':
                     stat = stat if stat not in [None, 'Did Not Play', 'Player Suspended'] else '0.0'
                     stat = convert_to_min(stat)
-                stat = float(stat) if stat else None
+                try:
+                    stat = float(stat) if stat else None
+                except:
+                    stat = None
                 self.match_[team]['players'][name][metric] = stat
 
     def _gen_scoring(self):

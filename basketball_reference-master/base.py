@@ -83,13 +83,22 @@ class PlayerBasicInfo():
         else:
             exp = int(end) - int(start)
 
-        player = {
-            'position': POSITIONS[self.player_wiki_.position.split(' / ')[0]],
-            'birth_date': self.player_wiki_.born[1:11],
-            'height': height if height else None,
-            'weight': weight if weight else None,
-            'experience': exp if exp else None,
-        }
+        if self.player_wiki_.position.split(' / ')[0] == "Centre":
+            player = {
+                'position': POSITIONS["Center"],
+                'birth_date': self.player_wiki_.born[1:11],
+                'height': height if height else None,
+                'weight': weight if weight else None,
+                'experience': exp if exp else None,
+            }
+        else:
+            player = {
+                'position': POSITIONS[self.player_wiki_.position.split(' / ')[0]],
+                'birth_date': self.player_wiki_.born[1:11],
+                'height': height if height else None,
+                'weight': weight if weight else None,
+                'experience': exp if exp else None,
+            }
 
         CACHE_PLAYERS_BASIC_INFO[self.name] = player
         return player

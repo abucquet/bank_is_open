@@ -186,6 +186,8 @@ X_train = pca.transform(X_train)
 X_val = pca.transform(X_val)
 X_test = pca.transform(X_test)
 
+print(pca.explained_variance_)
+
 '''
 # Try features with nonzero coefficients from lasso
 
