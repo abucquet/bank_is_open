@@ -112,7 +112,7 @@ print(mses)
 print(r2s)
 
 # Sweep found best max depth = 10
-depths = [10]
+depths = [5, 10, 15]
 mses = []
 r2s = []
 for depth in depths:
@@ -141,7 +141,7 @@ mses = []
 r2s = []
 for ntree in ntrees:
 	# Try random forests
-	regr = RandomForestRegressor(n_estimators=ntree, max_depth=10,
+	regr = RandomForestRegressor(n_estimators=ntree, max_depth=5,
 	                                random_state=2)
 	regr.fit(X_train, y_train)
 	# Make predictions using the testing set
@@ -196,6 +196,12 @@ print(X_train.shape)
 X_val = X_val[:,[i for i in range(len(regr.coef_)) if regr.coef_[i] != 0]]
 '''
 
+#####################################
+# NOW RERUN ALL WITH FEWER FEATURES #
+# NEED TO RETRAIN HYPERPARAMETERS   #
+#####################################
+
+
 # Create linear regression object
 regr = neural_network.MLPRegressor(solver='lbfgs', alpha=1e-5, activation = 'logistic', hidden_layer_sizes=(4,2), random_state=1)
 # Train the model using the training sets
@@ -208,5 +214,55 @@ print("Mean squared error: %.2f"
 # Explained variance score: 1 is perfect prediction
 print('Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
 
+
+
+alphas = [5, 10, 20]
+mses = []
+r2s = []
+for a in alphas:
+	# Create LASSO
+	regr = linear_model.Lasso(alpha = a)
+	# Train the model using the training sets
+	regr.fit(X_train, y_train)
+	# Make predictions using the testing set
+	y_pred = regr.predict(X_val)
+	# The coefficients
+	# print('Linreg Coefficients: \n', regr.coef_)
+	# The mean squared error
+	print("Linreg Mean squared error: %.2f"
+	      % metrics.mean_squared_error(y_val, y_pred))
+	mses.append(metrics.mean_squared_error(y_val, y_pred))
+	# Explained variance score: 1 is perfect prediction
+	print('Linreg Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
+	r2s.append(metrics.r2_score(y_val, y_pred))
+
+print("Lasso sweep results:")
+print(alphas)
+print(mses)
+print(r2s)
+
+
+depths = [5, 7, 10]
+mses = []
+r2s = []
+for depth in depths:
+	# Try random forests
+	regr = RandomForestRegressor(n_estimators=50, max_depth=depth,
+	                                random_state=2)
+	regr.fit(X_train, y_train)
+	# Make predictions using the testing set
+	y_pred = regr.predict(X_val)
+	# The mean squared error
+	print("Random Forest Mean squared error: %.2f"
+	      % metrics.mean_squared_error(y_val, y_pred))
+	mses.append(metrics.mean_squared_error(y_val, y_pred))
+	# Explained variance score: 1 is perfect prediction
+	print('Random Forest Variance score: %.2f' % metrics.r2_score(y_val, y_pred))
+	r2s.append(metrics.r2_score(y_val, y_pred))
+
+print("Random Forest depth sweep results:")
+print(depths)
+print(mses)
+print(r2s)
 
 
