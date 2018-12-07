@@ -53,7 +53,6 @@ def load_odds_data(filepath, season):
 		if home_team in team_map:
 			home_team = team_map[home_team]
 
-		
 		if len(str(row1["Date"][i])) == 4:
 			day = str(row1["Date"][i])[2:]
 			month = str(row1["Date"][i])[:2]
@@ -62,11 +61,10 @@ def load_odds_data(filepath, season):
 			month = "0" + str(row1["Date"][i])[:1]
 
 		date = "-" + month + "-" + day
-		if int(str(row1["Date"][i])[:2]) > 7:
+		if int(month) > 8:
 			date = year_1 + date
 		else:
 			date = year_2 + date
-
 
 		OU_Spread = np.sort([row1["Open"][i], row2["Open"][i+1]])
 		OU = OU_Spread[1]
