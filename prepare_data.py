@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 from tqdm import tqdm
+import pickle
 
 
 season_names = {'Golden State Warriors':'GSW',
@@ -228,11 +229,18 @@ def createFinalData(in_data):
     return np.array(X), np.array(y)
 
 
-# if __name__ == '__main__':
-#     season, odds = getData(2007)
-#     season, odds = cleanNames(season, odds)
-#     season, odds, in_data = makeIndices(season, odds)
-#     X, y = createFinalData(in_data)
+if __name__ == '__main__':
+    os.makedirs(os.path.dirname("neural_net_data/"), exist_ok=True)
+
+    for year in tqdm(range(2007, 2017)):
+        season, odds = getData(year)
+        season, odds = cleanNames(season, odds)
+        season, odds, in_data = makeIndices(season, odds)
+        X, y = createFinalData(in_data)
+
+        with open("neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
+            pickle.dump((X, y), f)
+
 
 
 
