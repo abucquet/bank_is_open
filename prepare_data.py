@@ -186,17 +186,17 @@ def createFinalData(in_data):
         for j, row_2 in past_n_home.iterrows():
             cur_data = []
 
-            team = row["team"]
-            opponent = row["opponent"]
+            team = row_2["team"]
+            opponent = row_2["opponent"]
 
             cur_data.extend(encoded[team])
             cur_data.extend(encoded[opponent])
-            cur_data.extend(row.drop(["team", "opponent", "date"]).values)
+            cur_data.extend(row_2.drop(["team", "opponent", "date"]).values)
 
             opp_stats = avgs.loc[opponent].values
 
             cur_data.extend(opp_stats)
-
+            
             data_home.append(cur_data)
 
         ################ AWAY TEAM PAST GAMES
@@ -204,12 +204,12 @@ def createFinalData(in_data):
         for j, row_2 in past_n_away.iterrows():
             cur_data = []
 
-            team = row["team"]
-            opponent = row["opponent"]
+            team = row_2["team"]
+            opponent = row_2["opponent"]
 
             cur_data.extend(encoded[team])
             cur_data.extend(encoded[opponent])
-            cur_data.extend(row.drop(["team", "opponent", "date"]).values)
+            cur_data.extend(row_2.drop(["team", "opponent", "date"]).values)
 
             opp_stats = avgs.loc[opponent].values
 
@@ -231,8 +231,6 @@ def createFinalData(in_data):
 
 
 if __name__ == '__main__':
-    os.makedirs(os.path.dirname("neural_net_data/"), exist_ok=True)
-
     for year in tqdm(range(2007, 2017)):
         if year == 2011: continue
         season, odds = getData(year)
@@ -240,5 +238,5 @@ if __name__ == '__main__':
         season, odds, in_data = makeIndices(season, odds)
         X, y = createFinalData(in_data)
 
-        with open("neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
+        with open("data/neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
             pickle.dump((X, y), f)
