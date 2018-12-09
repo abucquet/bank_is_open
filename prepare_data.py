@@ -64,6 +64,7 @@ def cleanNames(season, odds):
     odds_names["LA Lakers"] = "LAL"
     odds_names["LA Clippers"] = "LAC"
     odds_names["Okla City"] = "OKC"
+    odds_names["Oklahoma City"] = "OKC"
     
     odds["Home"] = odds["Home"].apply(lambda x: odds_names[x])
     odds["Away"] = odds["Away"].apply(lambda x: odds_names[x])
@@ -233,6 +234,7 @@ if __name__ == '__main__':
     os.makedirs(os.path.dirname("neural_net_data/"), exist_ok=True)
 
     for year in tqdm(range(2007, 2017)):
+        if year == 2011: continue
         season, odds = getData(year)
         season, odds = cleanNames(season, odds)
         season, odds, in_data = makeIndices(season, odds)
@@ -240,9 +242,3 @@ if __name__ == '__main__':
 
         with open("neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
             pickle.dump((X, y), f)
-
-
-
-
-
-
