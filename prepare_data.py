@@ -72,7 +72,7 @@ def getData(year):
     game_filepath = str(year) + "-" + str(year + 1) + "_games_final.csv"
     season = pd.read_csv(game_data_path + game_filepath)
 
-    season = season.drop(to_remove, axis = 1)
+    #season = season.drop(to_remove, axis = 1)
     
     odds_data_path = "data/odds_data_processed/"
     odds_filepath = str(year) + "-" + str(year + 1) + ".csv"
@@ -152,6 +152,8 @@ def get_past_n(in_data, dates, n):
         for team in pd.unique(home_only.team):
             #get the past games for team
             past_team = past_games[past_games.team == team].tail(3)
+            past_team["time_ago"] = past_team["date"].apply(lambda x: compute_day_diff(x, date))
+
             team_map[team] = past_team
         past_n[date] = team_map 
 
@@ -266,5 +268,5 @@ if __name__ == '__main__':
         season, odds, in_data = makeIndices(season, odds)
         X, y = createFinalData(in_data)
 
-        with open("data/neural_net_data_short/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
+        with open("data/neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
             pickle.dump((X, y), f)
