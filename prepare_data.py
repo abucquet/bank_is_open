@@ -62,8 +62,8 @@ to_remove = ['team_eFG%', 'team_2P', 'team_ORBr', 'team_2PAr', 'team_3PA',
 
 
 def compute_day_diff(d1, d2):
-    d1 = date(int(str(d1)[:4]), int(str(d1)[4:6]), int(str(d1)[6:8]))
-    d2 = date(int(str(d2)[:4]), int(str(d2)[4:6]), int(str(d2)[6:8]))
+    # d1 = date(int(str(d1)[:4]), int(str(d1)[4:6]), int(str(d1)[6:8]))
+    # d2 = date(int(str(d2)[:4]), int(str(d2)[4:6]), int(str(d2)[6:8]))
     
     return (d2 - d1).days
 
@@ -182,7 +182,16 @@ def one_hot_encode_teams():
 
     return encoded
 
+def make_date(d1):
+    return date(int(str(d1)[:4]), int(str(d1)[4:6]), int(str(d1)[6:8]))
+
 def createFinalData(in_data):
+
+    with open("data/distance_map.pkl", "rb") as f:
+        distance_map = pickle.load(f)
+    
+    in_data["date"] = in_data["date"].apply(make_date)
+
     dates = pd.unique(in_data.date)
 
     n = 3
@@ -211,8 +220,9 @@ def createFinalData(in_data):
 
         if past_n_home.shape[0] < n or past_n_away.shape[0] < n: continue
 
-        ################ AWAY TEAM PAST GAMES
+        ################ HOME TEAM PAST GAMES
         data_home = []
+        i = 0
         for j, row_2 in past_n_home.iterrows():
             cur_data = []
 
@@ -223,14 +233,29 @@ def createFinalData(in_data):
             cur_data.extend(encoded[opponent])
             cur_data.extend(row_2.drop(["team", "opponent", "date"]).values)
 
+            # distance to next game
+            if i != n - 1:
+                next_game = past_n_home.iloc[i + 1]
+            else:
+                next_game = row
+
+            city1 = team if row_2["home"] == 1 else row_2["opponent"]
+            city2 = team if next_game["home"] == 1 else next_game["opponent"]
+            dist_to_travel = distance_map[(city1, city2)]
+            cur_data.append(dist_to_travel)
+
+
             opp_stats = avgs.loc[opponent].values
 
             cur_data.extend(opp_stats)
 
             data_home.append(cur_data)
 
+            i += 1
+
         ################ AWAY TEAM PAST GAMES
         data_away = []
+        i = 0
         for j, row_2 in past_n_away.iterrows():
             cur_data = []
 
@@ -241,11 +266,24 @@ def createFinalData(in_data):
             cur_data.extend(encoded[opponent])
             cur_data.extend(row_2.drop(["team", "opponent", "date"]).values)
 
+            # distance to next game
+            if i != n - 1:
+                next_game = past_n_home.iloc[i + 1]
+            else:
+                next_game = row
+
+            city1 = team if row_2["home"] == 1 else row_2["opponent"]
+            city2 = team if next_game["home"] == 1 else next_game["opponent"]
+            dist_to_travel = distance_map[(city1, city2)]
+            cur_data.append(dist_to_travel)
+
             opp_stats = avgs.loc[opponent].values
 
             cur_data.extend(opp_stats)
 
             data_away.append(cur_data)
+
+            i += 1
 
         ################ MERGE THE TWO
         data = []
@@ -266,6 +304,10 @@ if __name__ == '__main__':
         season, odds = getData(year)
         season, odds = cleanNames(season, odds)
         season, odds, in_data = makeIndices(season, odds)
+
+        with open("temp.pkl", "wb") as f:
+            pickle.dump(in_data, f)
+
         X, y = createFinalData(in_data)
 
         with open("data/neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
