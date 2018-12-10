@@ -196,7 +196,7 @@ def createFinalData(in_data):
             opp_stats = avgs.loc[opponent].values
 
             cur_data.extend(opp_stats)
-            
+
             data_home.append(cur_data)
 
         ################ AWAY TEAM PAST GAMES
@@ -231,7 +231,7 @@ def createFinalData(in_data):
 
 
 if __name__ == '__main__':
-    for year in tqdm(range(2007, 2017)):
+    for year in tqdm(range(2007, 2018)):
         if year == 2011: continue
         season, odds = getData(year)
         season, odds = cleanNames(season, odds)
