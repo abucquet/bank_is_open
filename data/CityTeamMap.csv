@@ -6,7 +6,7 @@ Charlotte,CHA
 Atlanta,ATL
 Milwaukee,MIL
 Indianapolis,IND
-DET,DET
+Auburn+Hills,DET
 Cleveland,CLE
 Chicago,CHI
 Toronto,TOR
@@ -14,7 +14,7 @@ Philadelphia,PHI
 New+York+City,NYK
 New+York+City,BRK
 Boston,BOS
- Denver,DEN
+Denver,DEN
  Minneapolis,MIN
  Oklahoma+City,OKC
  Portland,POR
@@ -29,3 +29,4 @@ Boston,BOS
  Memphis,MEM
  New+Orleans,NOP
  San+Antonio,SAS
+Seattle,SEA
