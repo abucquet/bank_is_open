@@ -3,6 +3,8 @@ import pandas as pd
 import os
 from tqdm import tqdm
 import pickle
+import time
+from datetime import date
 
 
 season_names = {'Golden State Warriors':'GSW',
@@ -41,10 +43,36 @@ season_names = {'Golden State Warriors':'GSW',
                 'Oklahoma City Thunder': 'OKC'
         }
 
+to_remove = ['team_eFG%', 'team_2P', 'team_ORBr', 'team_2PAr', 'team_3PA',
+       'team_2P%', 'team_TOV%', 'team_FT', 'team_STL', 'team_FIC',
+       'team_AST/TOV', 'team_TRB', 'team_PTS', 'team_FGA',
+       'team_DRB', 'team_AST', 'team_TOV', 'team_FT%', 'team_+/-',
+       'team_AST%', 'team_2PA', 'team_TRB%', 'team_3P', 'team_FTA',
+       'team_FG%', 'team_3PAr', 'team_DRB%', 'team_USG%', 'team_PF',
+       'team_TSA', 'team_FT/FGA', 'opponent_ORB', 'opponent_FIC',
+       'opponent_2PA', 'opponent_DRtg', 'opponent_eFG%', 'opponent_2P%',
+       'opponent_USG%', 'opponent_2P', 'opponent_ORBr', 'opponent_2PAr',
+       'opponent_BLK%', 'opponent_HOB', 'team_BLK', 'opponent_AST/TOV',
+       'opponent_FG%', 'opponent_TOV%', 'opponent_FT', 'opponent_+/-',
+       'opponent_AST%', 'opponent_TOV', 'opponent_FGA', 'opponent_PTS',
+       'opponent_STL', 'opponent_TSA', 'opponent_PF', 'opponent_TRB%',
+       'opponent_3PAr', 'opponent_3P', 'team_3P%', 'opponent_TRB',
+       'opponent_AST', 'opponent_DRB', 'opponent_FT%', 'opponent_FTA',
+       'opponent_DRB%']
+
+
+def compute_day_diff(d1, d2):
+    d1 = date(int(str(d1)[:4]), int(str(d1)[4:6]), int(str(d1)[6:8]))
+    d2 = date(int(str(d2)[:4]), int(str(d2)[4:6]), int(str(d2)[6:8]))
+    
+    return (d2 - d1).days
+
 def getData(year):
     game_data_path = "data/final_game_data/"
     game_filepath = str(year) + "-" + str(year + 1) + "_games_final.csv"
     season = pd.read_csv(game_data_path + game_filepath)
+
+    season = season.drop(to_remove, axis = 1)
     
     odds_data_path = "data/odds_data_processed/"
     odds_filepath = str(year) + "-" + str(year + 1) + ".csv"
@@ -238,5 +266,5 @@ if __name__ == '__main__':
         season, odds, in_data = makeIndices(season, odds)
         X, y = createFinalData(in_data)
 
-        with open("data/neural_net_data/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
+        with open("data/neural_net_data_short/" + str(year) + "-" + str(year + 1) + ".pkl", 'wb') as f:
             pickle.dump((X, y), f)
